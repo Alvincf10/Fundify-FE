@@ -1,0 +1,422 @@
+{
+  "pool": 1421722,
+  "members": [
+    {
+      "id": "1755327227355_vlhgdh",
+      "name": "L",
+      "balance": 0
+    },
+    {
+      "id": "1755327227355_kndo85",
+      "name": "P",
+      "balance": 0
+    },
+    {
+      "id": "1755327227355_tl00o0",
+      "name": "A",
+      "balance": 67800
+    }
+  ],
+  "transactions": [
+    {
+      "id": "1756523046328_jfodr9",
+      "type": "expense",
+      "source": {
+        "kind": "pool"
+      },
+      "amount": 71000,
+      "desc": "soto betawi",
+      "date": "2025-08-29",
+      "createdAt": "2025-08-30T03:04:06.328Z"
+    },
+    {
+      "id": "1756186098600_omtqab",
+      "type": "expense",
+      "source": {
+        "kind": "pool"
+      },
+      "amount": 144666,
+      "desc": "billiard private",
+      "date": "2025-08-25",
+      "createdAt": "2025-08-26T05:28:18.600Z"
+    },
+    {
+      "id": "1756185893515_p3j518",
+      "type": "income",
+      "source": {
+        "kind": "pool"
+      },
+      "amount": 156200,
+      "desc": "bagi rata captain morgan + jajan alfa",
+      "date": "2025-08-26",
+      "createdAt": "2025-08-26T05:24:53.515Z"
+    },
+    {
+      "id": "1755934907940_40r7mu",
+      "type": "expense",
+      "source": {
+        "kind": "pool"
+      },
+      "amount": 78000,
+      "desc": "baso",
+      "date": "2025-08-23",
+      "createdAt": "2025-08-23T07:41:47.940Z"
+    },
+    {
+      "id": "1755934278976_ahddr1",
+      "type": "expense",
+      "source": {
+        "kind": "pool"
+      },
+      "amount": 330500,
+      "desc": "captain morgan",
+      "date": "2025-08-22",
+      "createdAt": "2025-08-23T07:31:18.976Z"
+    },
+    {
+      "id": "1755934215808_ec2p2y",
+      "type": "expense",
+      "source": {
+        "kind": "pool"
+      },
+      "amount": 64200,
+      "desc": "warjo",
+      "date": "2025-08-22",
+      "createdAt": "2025-08-23T07:30:15.808Z"
+    },
+    {
+      "id": "1755934062509_i98552",
+      "type": "expense",
+      "source": {
+        "kind": "pool"
+      },
+      "amount": 53000,
+      "desc": "jajan wonton dimsum",
+      "date": "2025-08-22",
+      "createdAt": "2025-08-23T07:27:42.510Z"
+    },
+    {
+      "id": "1755933974427_hq456b",
+      "type": "expense",
+      "source": {
+        "kind": "pool"
+      },
+      "amount": 72000,
+      "desc": "roko 2",
+      "date": "2025-08-22",
+      "createdAt": "2025-08-23T07:26:14.427Z"
+    },
+    {
+      "id": "1755933930160_q51tbb",
+      "type": "expense",
+      "source": {
+        "kind": "pool"
+      },
+      "amount": 138600,
+      "desc": "belanja alfa",
+      "date": "2025-08-22",
+      "createdAt": "2025-08-23T07:25:30.160Z"
+    },
+    {
+      "id": "1755696537826_symxle",
+      "type": "expense",
+      "source": {
+        "kind": "pool"
+      },
+      "amount": 125000,
+      "desc": "kopi londo",
+      "date": "2025-08-19",
+      "createdAt": "2025-08-20T13:28:57.826Z"
+    },
+    {
+      "id": "1755696429992_8uhrv3",
+      "type": "income",
+      "source": {
+        "kind": "pool"
+      },
+      "amount": 1600000,
+      "desc": "termin 2",
+      "date": "2025-08-20",
+      "createdAt": "2025-08-20T13:27:09.992Z"
+    },
+    {
+      "id": "1755621156705_t5dmsf",
+      "type": "expense",
+      "source": {
+        "kind": "personal",
+        "memberId": "1755327227355_tl00o0"
+      },
+      "amount": 28000,
+      "desc": "makan baso",
+      "date": "2025-08-18",
+      "createdAt": "2025-08-19T16:32:36.705Z"
+    },
+    {
+      "id": "1755538269787_h8386k",
+      "type": "expense",
+      "source": {
+        "kind": "pool"
+      },
+      "amount": 275000,
+      "desc": "billiard",
+      "date": "2025-08-18",
+      "createdAt": "2025-08-18T17:31:09.787Z"
+    },
+    {
+      "id": "1755538233675_scnsnp",
+      "type": "expense",
+      "source": {
+        "kind": "pool"
+      },
+      "amount": 56000,
+      "desc": "makan baso",
+      "date": "2025-08-18",
+      "createdAt": "2025-08-18T17:30:33.675Z"
+    },
+    {
+      "id": "1755437929416_cwxaie",
+      "type": "income",
+      "source": {
+        "kind": "pool"
+      },
+      "amount": 300000,
+      "desc": "donasi mas wowo",
+      "date": "2025-08-17",
+      "createdAt": "2025-08-17T13:38:49.416Z"
+    },
+    {
+      "id": "1755393553053_3lb5su",
+      "type": "expense",
+      "source": {
+        "kind": "pool"
+      },
+      "amount": 373512,
+      "desc": "shamrock",
+      "date": "2025-08-16",
+      "createdAt": "2025-08-17T01:19:13.053Z"
+    },
+    {
+      "id": "1755329486601_2d8cpr",
+      "type": "expense",
+      "source": {
+        "kind": "personal",
+        "memberId": "1755327227355_tl00o0"
+      },
+      "amount": 30000,
+      "desc": "admin bca 2kartu",
+      "date": "2025-08-16",
+      "createdAt": "2025-08-16T07:31:26.601Z"
+    },
+    {
+      "id": "1755329465020_jvvjzz",
+      "type": "expense",
+      "source": {
+        "kind": "personal",
+        "memberId": "1755327227355_tl00o0"
+      },
+      "amount": 13700,
+      "desc": "alfa",
+      "date": "2025-08-15",
+      "createdAt": "2025-08-16T07:31:05.020Z"
+    },
+    {
+      "id": "1755329441435_7wanzl",
+      "type": "expense",
+      "source": {
+        "kind": "personal",
+        "memberId": "1755327227355_tl00o0"
+      },
+      "amount": 31000,
+      "desc": "mixue",
+      "date": "2025-08-15",
+      "createdAt": "2025-08-16T07:30:41.435Z"
+    },
+    {
+      "id": "1755329425933_cy35hf",
+      "type": "expense",
+      "source": {
+        "kind": "personal",
+        "memberId": "1755327227355_tl00o0"
+      },
+      "amount": 47000,
+      "desc": "padang",
+      "date": "2025-08-15",
+      "createdAt": "2025-08-16T07:30:25.933Z"
+    },
+    {
+      "id": "1755329396768_hfgt0z",
+      "type": "expense",
+      "source": {
+        "kind": "personal",
+        "memberId": "1755327227355_tl00o0"
+      },
+      "amount": 32000,
+      "desc": "anggur",
+      "date": "2025-08-15",
+      "createdAt": "2025-08-16T07:29:56.768Z"
+    },
+    {
+      "id": "1755329342069_tqn7lm",
+      "type": "expense",
+      "source": {
+        "kind": "personal",
+        "memberId": "1755327227355_tl00o0"
+      },
+      "amount": 230000,
+      "desc": "cash",
+      "date": "2025-08-15",
+      "createdAt": "2025-08-16T07:29:02.069Z"
+    },
+    {
+      "id": "1755329315969_m5p5da",
+      "type": "expense",
+      "source": {
+        "kind": "personal",
+        "memberId": "1755327227355_tl00o0"
+      },
+      "amount": 32500,
+      "desc": "kd",
+      "date": "2025-08-15",
+      "createdAt": "2025-08-16T07:28:35.969Z"
+    },
+    {
+      "id": "1755329253169_9kmayl",
+      "type": "expense",
+      "source": {
+        "kind": "personal",
+        "memberId": "1755327227355_tl00o0"
+      },
+      "amount": 40000,
+      "desc": "makan bebek",
+      "date": "2025-08-16",
+      "createdAt": "2025-08-16T07:27:33.169Z"
+    },
+    {
+      "id": "1755329138586_3j59rs",
+      "type": "expense",
+      "source": {
+        "kind": "personal",
+        "memberId": "1755327227355_tl00o0"
+      },
+      "amount": 57000,
+      "desc": "kopi bombom",
+      "date": "2025-08-14",
+      "createdAt": "2025-08-16T07:25:38.586Z"
+    },
+    {
+      "id": "1755329091485_a1sfst",
+      "type": "expense",
+      "source": {
+        "kind": "personal",
+        "memberId": "1755327227355_tl00o0"
+      },
+      "amount": 23000,
+      "desc": "baso",
+      "date": "2025-08-14",
+      "createdAt": "2025-08-16T07:24:51.485Z"
+    },
+    {
+      "id": "1755329073169_sb4olh",
+      "type": "expense",
+      "source": {
+        "kind": "personal",
+        "memberId": "1755327227355_tl00o0"
+      },
+      "amount": 37500,
+      "desc": "mkn sope",
+      "date": "2025-08-14",
+      "createdAt": "2025-08-16T07:24:33.169Z"
+    },
+    {
+      "id": "1755329031601_951iq7",
+      "type": "expense",
+      "source": {
+        "kind": "personal",
+        "memberId": "1755327227355_tl00o0"
+      },
+      "amount": 11500,
+      "desc": "aalfa",
+      "date": "2025-08-13",
+      "createdAt": "2025-08-16T07:23:51.601Z"
+    },
+    {
+      "id": "1755328992136_247mlc",
+      "type": "expense",
+      "source": {
+        "kind": "personal",
+        "memberId": "1755327227355_tl00o0"
+      },
+      "amount": 54000,
+      "desc": "kuota",
+      "date": "2025-08-13",
+      "createdAt": "2025-08-16T07:23:12.136Z"
+    },
+    {
+      "id": "1755328943536_iwmx4c",
+      "type": "expense",
+      "source": {
+        "kind": "personal",
+        "memberId": "1755327227355_tl00o0"
+      },
+      "amount": 65000,
+      "desc": "mkn unire",
+      "date": "2025-08-14",
+      "createdAt": "2025-08-16T07:22:23.536Z"
+    },
+    {
+      "id": "1755327722621_iq5i7n",
+      "type": "expense",
+      "source": {
+        "kind": "pool"
+      },
+      "amount": 64000,
+      "desc": "kawa blackcurrent",
+      "date": "2025-08-14",
+      "createdAt": "2025-08-16T07:02:02.621Z"
+    },
+    {
+      "id": "1755327575788_is9sv2",
+      "type": "expense",
+      "source": {
+        "kind": "pool"
+      },
+      "amount": 70000,
+      "desc": "roko sebelum shamrock",
+      "date": "2025-08-16",
+      "createdAt": "2025-08-16T06:59:35.788Z"
+    },
+    {
+      "id": "1755327533225_x5hhnw",
+      "type": "expense",
+      "source": {
+        "kind": "pool"
+      },
+      "amount": 63000,
+      "desc": "makan bebek",
+      "date": "2025-08-16",
+      "createdAt": "2025-08-16T06:58:53.225Z"
+    },
+    {
+      "id": "1755327421138_r75wrw",
+      "type": "expense",
+      "source": {
+        "kind": "pool"
+      },
+      "amount": 120000,
+      "desc": "roko2 anggur",
+      "date": "2025-08-15",
+      "createdAt": "2025-08-16T06:57:01.138Z"
+    },
+    {
+      "id": "1755327335489_tpb8hh",
+      "type": "expense",
+      "source": {
+        "kind": "pool"
+      },
+      "amount": 136000,
+      "desc": "cafe unire",
+      "date": "2025-08-14",
+      "createdAt": "2025-08-16T06:55:35.489Z"
+    }
+  ]
+}
