@@ -67,6 +67,48 @@ export default function Tracker() {
     setTxType('expense'); setSourceKind('pool'); setAmount(0); setDesc(''); setDate(todayISO())
   }
 
+  // === DELETE CONFIRMATION MODAL ===
+    type PendingDelete = { id: string; summary: string } | null
+    const [confirmOpen, setConfirmOpen] = useState(false)
+    const [pendingDelete, setPendingDelete] = useState<PendingDelete>(null)
+    const [deleting, setDeleting] = useState(false)
+
+    function requestDelete(tx: Tx) {
+      let srcLabel: string
+
+      if (tx.source.kind === 'personal') {
+        // di sini TS tahu tx.source adalah PersonalSource
+        const memberId = tx.source.memberId
+        const member = state.members.find(m => m.id === memberId)
+        srcLabel = `Dompet ${member?.name ?? '?'}`
+      } else {
+        // pasti 'pool'
+        srcLabel = 'Kas Bersama'
+      }
+
+      const sign = tx.type === 'expense' ? '−' : '+'
+      const summary = `${tx.date} • ${srcLabel} • ${tx.desc || '-'} • ${sign} ${fmtIDR(tx.amount)}`
+      setPendingDelete({ id: tx.id, summary })
+      setConfirmOpen(true)
+    }
+
+    async function confirmDeleteNow() {
+      if (!pendingDelete) return
+      setDeleting(true)
+      try {
+        await deleteTx(pendingDelete.id)
+        setConfirmOpen(false)
+        setPendingDelete(null)
+      } finally {
+        setDeleting(false)
+      }
+    }
+
+    function cancelDelete() {
+      setConfirmOpen(false)
+      setPendingDelete(null)
+    }
+
   // === ADD TRANSACTION (optimistic + sync server) ===
   async function addTx() {
     const amt = Math.floor(Number(amount) || 0)
@@ -399,7 +441,12 @@ export default function Tracker() {
                       <td className="py-2 pr-3 align-top">{t.desc || '-'}</td>
                       <td className="py-2 pr-3 align-top font-medium">{t.type === 'expense' ? '-' : '+'} {fmtIDR(t.amount)}</td>
                       <td className="py-2 pr-3 align-top">
-                        <button onClick={() => deleteTx(t.id)} className="px-2 py-1 rounded-lg bg-slate-800 hover:bg-slate-700">Hapus</button>
+                        <button
+                          onClick={() => requestDelete(t)}
+                          className="px-2 py-1 rounded-lg bg-slate-800 hover:bg-slate-700"
+                        >
+                          Hapus
+                        </button>
                       </td>
                     </tr>
                   )
@@ -417,6 +464,44 @@ export default function Tracker() {
           <li>Gunakan tab untuk melihat riwayat per sumber.</li>
         </ul>
       </section>
+      {/* Confirm Delete Modal */}
+      {confirmOpen && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center"
+          role="dialog"
+          aria-modal="true"
+          onKeyDown={(e) => { if (e.key === 'Escape') cancelDelete() }}
+        >
+          <div className="absolute inset-0 bg-black/60" onClick={cancelDelete} />
+          <div className="relative w-[92%] max-w-md rounded-2xl bg-slate-900 border border-slate-800 shadow-xl p-4">
+            <h3 className="text-lg font-semibold mb-2">Hapus transaksi?</h3>
+            <p className="text-slate-300 text-sm mb-4">
+              Tindakan ini akan mengembalikan saldo sumber/tujuan secara otomatis (rollback).
+            </p>
+            {pendingDelete && (
+              <div className="text-xs bg-slate-800 rounded-xl p-3 mb-4 text-slate-300">
+                {pendingDelete.summary}
+              </div>
+            )}
+            <div className="flex justify-end gap-2">
+              <button
+                onClick={cancelDelete}
+                className="px-3 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-sm"
+                disabled={deleting}
+              >
+                Batal
+              </button>
+              <button
+                onClick={confirmDeleteNow}
+                className="px-3 py-2 rounded-xl bg-red-700 hover:bg-red-600 text-sm disabled:opacity-70"
+                disabled={deleting}
+              >
+                {deleting ? 'Menghapus…' : 'Hapus'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
