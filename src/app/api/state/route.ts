@@ -1,3 +1,4 @@
+// app/api/state/route.ts
 import { NextResponse } from 'next/server'
 
 export const dynamic = 'force-dynamic'
@@ -10,7 +11,6 @@ export async function GET() {
       fetch(`${API}/members`, { cache: 'no-store' }),
       fetch(`${API}/transactions`, { cache: 'no-store' }),
     ])
-
     if (!poolRes.ok) throw new Error(`Pool error: ${poolRes.status}`)
     if (!membersRes.ok) throw new Error(`Members error: ${membersRes.status}`)
     if (!txRes.ok) throw new Error(`Transactions error: ${txRes.status}`)
@@ -26,7 +26,6 @@ export async function GET() {
           ? poolJson
           : poolJson?.pool ?? 0
 
-    // Normalisasi _id → id (biar cocok dengan tipe di UI)
     const members = (membersRaw ?? []).map((m: any) => ({
       id: m._id || m.id,
       name: m.name,

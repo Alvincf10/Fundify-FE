@@ -1,31 +1,33 @@
 'use client'
 
-import { useEffect, useMemo, useState, useRef } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { AppState, Member, Tx, TxType, Source } from '../lib/types'
 import { DEFAULT_STATE, newId } from '../lib/constants'
 import { fmtIDR, todayISO } from '../lib/format'
 import { loadState, saveState } from '../lib/storage'
-import { fetchServerState, saveServerState } from '../lib/serverStorage'
-import { fetchState, addTransaction as apiAddTx, deleteTransaction as apiDelTx, setPool as apiSetPool, updateMember as apiUpdateMember } from '../lib/serverApi'
-// type guard biar TS paham kapan ada memberId
-function isPersonal(s: Source): s is { kind: 'personal'; memberId: string } {
-  return s.kind === 'personal'
-}
+import {
+  fetchState,
+  addTransaction as apiAddTx,
+  deleteTransaction as apiDelTx,
+  setPool as apiSetPool,
+  updateMember as apiUpdateMember,
+} from '../lib/serverApi'
 
-type PersonalSource = Extract<Source, { kind: 'personal' }>;
-const isPersonalSource = (s: Source): s is PersonalSource => s.kind === 'personal';
+// helper narrowing aman untuk memberId
+type Personal = Extract<Source, { kind: 'personal' }>
+const isPersonalSource = (s: Source): s is Personal => s.kind === 'personal'
 
 export default function Tracker() {
   const [state, setState] = useState<AppState>(DEFAULT_STATE)
   const [editing, setEditing] = useState(false)
 
-  // 1) Hydrate dari backend dulu; kalau error → fallback ke localStorage
+  // Hydrate dari backend; fallback ke localStorage kalau error
   useEffect(() => {
     let canceled = false
     ;(async () => {
       try {
         const remote = await fetchState()
-        if (!canceled && remote) setState(remote)
+        if (!canceled) setState(remote)
       } catch {
         const local = loadState()
         if (!canceled && local) setState(local)
@@ -34,7 +36,7 @@ export default function Tracker() {
     return () => { canceled = true }
   }, [])
 
-  // 2) Persist ke localStorage (sebagai cache offline)
+  // Cache lokal untuk offline
   useEffect(() => { saveState(state) }, [state])
 
   const totalPersonal = useMemo(
@@ -65,15 +67,7 @@ export default function Tracker() {
     setTxType('expense'); setSourceKind('pool'); setAmount(0); setDesc(''); setDate(todayISO())
   }
 
-  function resetAll() {
-    // NOTE: ini hanya reset state di UI/localStorage.
-    // Data di server TIDAK diubah.
-    if (!confirm('Reset semua data di tampilan ke default? (Tidak mengubah data di server)')) return
-    setState(DEFAULT_STATE)
-    resetTxForm()
-  }
-
-  // === ADD TRANSACTION (optimistic) ===
+  // === ADD TRANSACTION (optimistic + sync server) ===
   async function addTx() {
     const amt = Math.floor(Number(amount) || 0)
     if (!amt || amt <= 0) return alert('Nominal harus > 0')
@@ -88,22 +82,19 @@ export default function Tracker() {
       createdAt: new Date().toISOString(),
     }
 
-    // simpan state lama untuk rollback kalau gagal
-    const prev = state
+    const prevSnapshot = state
 
-    // 1) optimistic update (logic kamu tetap)
+    // optimistic update
     setState((prev) => {
       let pool = prev.pool
       const members: Member[] = prev.members.map((m) => ({ ...m }))
+      const src = optimisticTx.source
 
       if (optimisticTx.type === 'expense') {
-        const src = optimisticTx.source; // <- simpan ke variabel lokal agar CF analysis TS lebih akurat
-
         if (src.kind === 'pool') {
           if (pool < amt) { alert('Saldo kas tidak cukup.'); return prev }
           pool -= amt
         } else if (src.kind === 'personal') {
-          // di cabang ini TS sudah tahu src adalah { kind: 'personal'; memberId: string }
           const idx = members.findIndex((m) => m.id === src.memberId)
           if (idx >= 0) {
             if (members[idx].balance < amt) { alert(`Saldo ${members[idx].name} tidak cukup.`); return prev }
@@ -111,8 +102,6 @@ export default function Tracker() {
           }
         }
       } else {
-        const src = optimisticTx.source;
-
         if (src.kind === 'pool') {
           pool += amt
         } else if (src.kind === 'personal') {
@@ -120,13 +109,14 @@ export default function Tracker() {
           if (idx >= 0) members[idx].balance += amt
         }
       }
+
       const transactions = [optimisticTx, ...prev.transactions]
       return { ...prev, pool, members, transactions }
     })
 
     resetTxForm()
 
-    // 2) call API
+    // sync ke server
     try {
       const created = await apiAddTx({
         type: optimisticTx.type,
@@ -135,7 +125,6 @@ export default function Tracker() {
         desc: optimisticTx.desc,
         date: optimisticTx.date,
       })
-      // ganti id lokal dengan _id server
       const serverId = created._id || created.id
       if (serverId) {
         setState((s) => ({
@@ -144,70 +133,67 @@ export default function Tracker() {
         }))
       }
     } catch (e: any) {
-      // rollback bila gagal
       alert(`Gagal simpan transaksi: ${e?.message || e}`)
-      setState(prev)
+      setState(prevSnapshot) // rollback
     }
   }
 
-  // === DELETE TRANSACTION (optimistic) ===
+  // === DELETE TRANSACTION (optimistic + sync server) ===
   async function deleteTx(txId: string) {
-  const tx = state.transactions.find((t) => t.id === txId)
-  if (!tx) return
+    const tx = state.transactions.find((t) => t.id === txId)
+    if (!tx) return
 
-  const prevSnapshot = state
+    const prevSnapshot = state
 
-  // optimistic reverse effect
-  setState((prev) => {
-    let pool = prev.pool
-    const members = prev.members.map((m) => ({ ...m }))
-    const amt = tx.amount
-    const src = tx.source // <-- narrowing lewat variabel lokal
+    setState((prev) => {
+      let pool = prev.pool
+      const members = prev.members.map((m) => ({ ...m }))
+      const amt = tx.amount
+      const src = tx.source
 
-    if (tx.type === 'expense') {
-      if (src.kind === 'pool') {
-        pool += amt
-      } else if (src.kind === 'personal') {
-        const idx = members.findIndex((m) => m.id === src.memberId)
-        if (idx >= 0) members[idx].balance += amt
+      if (tx.type === 'expense') {
+        if (src.kind === 'pool') pool += amt
+        else if (src.kind === 'personal') {
+          const idx = members.findIndex((m) => m.id === src.memberId)
+          if (idx >= 0) members[idx].balance += amt
+        }
+      } else {
+        if (src.kind === 'pool') pool -= amt
+        else if (src.kind === 'personal') {
+          const idx = members.findIndex((m) => m.id === src.memberId)
+          if (idx >= 0) members[idx].balance -= amt
+        }
       }
-    } else {
-      if (src.kind === 'pool') {
-        pool -= amt
-      } else if (src.kind === 'personal') {
-        const idx = members.findIndex((m) => m.id === src.memberId)
-        if (idx >= 0) members[idx].balance -= amt
-      }
+
+      const transactions = prev.transactions.filter((t) => t.id !== txId)
+      return { ...prev, pool, members, transactions }
+    })
+
+    try {
+      await apiDelTx(txId)
+    } catch (e: any) {
+      alert(`Gagal hapus transaksi: ${e?.message || e}`)
+      setState(prevSnapshot) // rollback
     }
-
-    const transactions = prev.transactions.filter((t) => t.id !== txId)
-    return { ...prev, pool, members, transactions }
-  })
-
-  try {
-    await apiDelTx(txId)
-  } catch (e: any) {
-    alert(`Gagal hapus transaksi: ${e?.message || e}`)
-    setState(prevSnapshot) // rollback
   }
-}
 
   // === UPDATE POOL (debounced PATCH) ===
-  const poolSaveTimer = useRef<any>(null)
+  const poolSaveTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
   function updatePool(val: number | string) {
     const v = Math.max(0, Math.floor(Number(val) || 0))
     setState((prev) => ({ ...prev, pool: v }))
 
-    clearTimeout(poolSaveTimer.current)
+    if (poolSaveTimer.current) clearTimeout(poolSaveTimer.current)
     poolSaveTimer.current = setTimeout(async () => {
       try { await apiSetPool(v) } catch (e: any) { console.error('setPool error', e) }
     }, 500)
   }
 
   // === UPDATE MEMBER (debounced PATCH) ===
-  const memberSaveTimers = useRef<Record<string, any>>({})
+  const memberSaveTimers = useRef<Record<string, ReturnType<typeof setTimeout>>>({})
   function scheduleSaveMember(id: string, patch: { name?: string; balance?: number }) {
-    clearTimeout(memberSaveTimers.current[id])
+    const existing = memberSaveTimers.current[id]
+    if (existing) clearTimeout(existing)
     memberSaveTimers.current[id] = setTimeout(async () => {
       try { await apiUpdateMember(id, patch) } catch (e: any) { console.error('updateMember error', e) }
     }, 500)
@@ -224,11 +210,12 @@ export default function Tracker() {
     scheduleSaveMember(id, { balance: val })
   }
 
-  // Quick action: termin cair ke kas (default 4jt)
+  // Quick action
   function addTermin(amount = 4_000_000) {
     setTxType('income'); setSourceKind('pool'); setAmount(amount); setDesc('Termin cair ke Kas'); setDate(todayISO())
   }
 
+  // sorted & filtered
   const sortedTx = useMemo(() => {
     return [...state.transactions].sort((a, b) => {
       const d = b.date.localeCompare(a.date)
@@ -237,7 +224,6 @@ export default function Tracker() {
     })
   }, [state.transactions])
 
-  // === Tabs filter riwayat ===
   const [activeTab, setActiveTab] = useState<string>('all')
   const tabs = [
     { id: 'all', label: 'Semua' },
@@ -248,22 +234,16 @@ export default function Tracker() {
   const filteredTx = useMemo(() => {
     if (activeTab === 'all') return sortedTx
     if (activeTab === 'pool') return sortedTx.filter((t) => t.source.kind === 'pool')
-    return sortedTx.filter((t) => isPersonal(t.source) && t.source.memberId === activeTab)
+    return sortedTx.filter((t) => isPersonalSource(t.source) && t.source.memberId === activeTab)
   }, [activeTab, sortedTx])
 
-  async function exportToServer() {
-  alert('Sekarang data otomatis tersimpan ke server ketika kamu menambah/menghapus transaksi atau mengubah pool/member.');
-}
-async function importFromServer() {
-  try {
-    const fresh = await fetchState()
-    setState(fresh)
-    alert('✅ Data di-refresh dari server')
-  } catch {
-    alert('❌ Gagal ambil dari server')
+  // Reset UI (local only)
+  function resetTxFormOnly() { resetTxForm() }
+  function resetAll() {
+    if (!confirm('Reset semua data di tampilan ke default? (Tidak mengubah data di server)')) return
+    setState(DEFAULT_STATE)
+    resetTxForm()
   }
-}
-
 
   return (
     <div className="space-y-6">
@@ -275,15 +255,6 @@ async function importFromServer() {
             {editing ? 'Selesai' : 'Edit Setup'}
           </button>
           <button onClick={() => addTermin()} className="px-3 py-2 rounded-xl bg-emerald-700 hover:bg-emerald-600 text-sm">Termin Cair +4jt</button>
-
-          {/* NEW: Sync */}
-          <button onClick={exportToServer} className="px-3 py-2 rounded-xl bg-indigo-700 hover:bg-indigo-600 text-sm">
-            Export ke Server
-          </button>
-          <button onClick={importFromServer} className="px-3 py-2 rounded-xl bg-teal-700 hover:bg-teal-600 text-sm">
-            Import dari Server
-          </button>
-
           <button onClick={resetAll} className="px-3 py-2 rounded-xl bg-red-700 hover:bg-red-600 text-sm">Reset</button>
         </div>
       </header>
@@ -371,15 +342,14 @@ async function importFromServer() {
 
         <div className="flex items-center gap-2">
           <button onClick={addTx} className="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 font-medium">Simpan</button>
-          <button onClick={resetTxForm} className="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700">Clear</button>
+          <button onClick={resetTxFormOnly} className="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700">Clear</button>
         </div>
       </section>
 
-      {/* Riwayat (dengan Tab filter) */}
+      {/* Riwayat */}
       <section className="bg-slate-900 rounded-2xl p-4 shadow">
         <h2 className="text-lg font-semibold mb-3">Riwayat Transaksi</h2>
 
-        {/* Tab Switcher */}
         <div className="flex gap-2 mb-4">
           {tabs.map((tab) => (
             <button
@@ -394,7 +364,6 @@ async function importFromServer() {
           ))}
         </div>
 
-        {/* Tabel */}
         {filteredTx.length === 0 ? (
           <div className="text-slate-400 text-sm">Belum ada transaksi.</div>
         ) : (
@@ -412,13 +381,12 @@ async function importFromServer() {
               </thead>
               <tbody>
                 {filteredTx.map((t) => {
+                  const src = t.source
                   let sourceLabel = 'Kas Bersama'
-                  if (isPersonal(t.source)) {
-                    const { memberId } = t.source
-                    const member = state.members.find((m) => m.id === memberId)
+                  if (src.kind === 'personal') {
+                    const member = state.members.find((m) => m.id === src.memberId)
                     sourceLabel = `Dompet ${member?.name ?? '?'}`
                   }
-
                   return (
                     <tr key={t.id} className="border-b border-slate-800 hover:bg-slate-800/60">
                       <td className="py-2 pr-3 align-top whitespace-nowrap">{t.date}</td>
@@ -445,8 +413,7 @@ async function importFromServer() {
       {/* Tips */}
       <section className="text-xs text-slate-400">
         <ul className="list-disc pl-5 space-y-1">
-          <li>Data otomatis tersimpan di browser (localStorage).</li>
-          <li>Gunakan tombol "Termin Cair +4jt" saat termin 2–4 cair.</li>
+          <li>Data otomatis disimpan di server (Mongo) + cache di browser (localStorage).</li>
           <li>Gunakan tab untuk melihat riwayat per sumber.</li>
         </ul>
       </section>
